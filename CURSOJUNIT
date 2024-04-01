@@ -1,0 +1,352 @@
+Curso Junit 
+
+Dentro de una prueba unitaria deberian existir grandes bloques
+
+1.- GIVEN
+Es el bloque que se encarga de crear todo lo necesario para la prueba unitaria
+
+2.- WHEN
+Esta seccion es la parte donde se invoca al metodo que se requiere probar
+
+3.- THEN
+Todas las validaciones sobre el resultado obtenido de la ejecucion
+
+Que es un ASSERT?
+Un assert es una instrucción en muchos lenguajes de programación que se utiliza para verificar una condición y producir un error si la condición no se cumple.
+Su propósito principal es ayudar en el desarrollo y la depuración del código, permitiendo a los programadores afirmar suposiciones sobre el estado del programa
+en puntos específicos del código
+ Dentro de una prueba esto cumple un rol fundamental porque:
+
+Me previene validar el resultado de una prueba
+Puede usarse para validar tanto casos exitosos como excepciones
+Existen varios tipos de validaciones
+Mep ermiten saber que valor esperaba y cual obtuve de ejecutar la prueba
+
+Tipos de ASSERT
+
+ASSERT ALL: Agrupa un conjunto de validaciones
+ASSERT TRUE: 
+ASSERT EQUALS: Comparar los todos elementos 
+ASSERT NULL
+ASSERT NOT NULL
+ASSERT ARRAY EQUALS
+ASSERT THAT: Hacer operaciones mas complejas poder hacer un match etc
+ASSERT THROWS: Validar si una excepcion es la que nosotros esperamos
+FAIL: Que el test salio con un valor que no esperabamos
+
+CICLO DE VIDA
+
+Son todas aquellas cosas qe se ejecutan antes durante y despues 
+Algunos pueden ser antes de cada prueba o antes de todas 
+Algunos pueden ser despues de cada prueba o despues de todas 
+
+
+ANOTACIONES
+
+BEFORE EACH: Se ejecuta antes varias veces iniciar variables por ejemplo
+BEFORE ALL: Se ejecuta antes solo una vez 
+AFTER EACH: Se ejecuta despues e cada prueba unitaria
+AFTER ALL: Seejecuta despues de todas las pruebas solamente una vez 
+
+
+CONTROLADOR
+
+import com.api.nivelmedio.Controllers.AutorController;
+import com.api.nivelmedio.Entities.Autor;
+import com.api.nivelmedio.Services.AutorService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+import java.util.Collections;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.*;
+
+public class AutorControllerTest {
+
+    @Mock
+    private AutorService autorService;
+
+    @InjectMocks
+    private AutorController autorController;
+
+    @BeforeEach
+    public void init() {
+        MockitoAnnotations.initMocks(this);
+    }
+
+    @Test
+    public void testGetAll() {
+        // Arrange
+        Autor autor = new Autor();
+        autor.setId(1L);
+        autor.setNombre("Autor de prueba");
+        autor.setEstado(1);
+
+        List<Autor> autores = Collections.singletonList(autor);
+
+        when(autorService.findByEstado(1)).thenReturn(autores);
+
+        // Act
+        ResponseEntity<?> responseEntity = autorController.getAll();
+
+        // Assert
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals(autores, responseEntity.getBody());
+        verify(autorService, times(1)).findByEstado(1);
+    }
+}
+
+
+**************************************************************************++
+ENTIDADES
+
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
+
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+public class AutorTest {
+
+    private static Validator validator;
+
+    @BeforeAll
+    public static void setUpValidator() {
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        validator = factory.getValidator();
+    }
+
+    @Test
+    public void testAutorValidation() {
+        Autor autor = new Autor();
+        autor.setId(1L);
+        autor.setNombre_autor("John");
+        autor.setApp("Doe");
+        autor.setApm("Smith");
+        autor.setFecha_nacimiento(LocalDate.of(1990, 5, 15));
+        autor.setEstado(1);
+
+        // Validar la entidad utilizando el validador
+        var violations = validator.validate(autor);
+        assertTrue(violations.isEmpty(), "La validación de Autor no debe tener violaciones");
+    }
+
+    @Test
+    public void testNombreAutorInvalido() {
+        Autor autor = new Autor();
+        autor.setId(1L);
+        autor.setNombre_autor("john"); // Nombre en minúsculas, debe dar error de validación
+
+        var violations = validator.validate(autor);
+        assertFalse(violations.isEmpty(), "El nombre del autor debe contener solo letras mayúsculas");
+    }
+
+    @Test
+    public void testFechaNacimientoFutura() {
+        Autor autor = new Autor();
+        autor.setId(1L);
+        autor.setNombre_autor("John");
+        autor.setApp("Doe");
+        autor.setApm("Smith");
+        autor.setFecha_nacimiento(LocalDate.now().plusDays(1)); // Fecha futura, debe dar error de validación
+
+        var violations = validator.validate(autor);
+        assertFalse(violations.isEmpty(), "La fecha de nacimiento debe ser en el pasado");
+    }
+
+    @Test
+    public void testLibrosAsociados() {
+        Autor autor = new Autor();
+        autor.setId(1L);
+        autor.setNombre_autor("John");
+        autor.setApp("Doe");
+        autor.setApm("Smith");
+        autor.setFecha_nacimiento(LocalDate.of(1990, 5, 15));
+        autor.setEstado(1);
+
+        List<Libro> libros = new ArrayList<>();
+        libros.add(new Libro());
+        autor.setLibros(libros);
+
+        assertEquals(libros.size(), autor.getLibros().size(), "El número de libros asociados debe ser igual");
+    }
+}
+
+**************************************************************************************************************+++
+SERVICES
+
+import com.api.nivelmedio.Entities.Autor;
+import com.api.nivelmedio.Repositories.AutorRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+public class AutorServiceTest {
+
+    @Mock
+    private AutorRepository autorRepository;
+
+    @InjectMocks
+    private AutorService autorService;
+
+    @BeforeEach
+    public void setUp() {
+        MockitoAnnotations.openMocks(this);
+    }
+
+    @Test
+    public void testFindById() throws Exception {
+        Long id = 1L;
+        Autor autor = new Autor();
+        autor.setId(id);
+        autor.setNombre_autor("John");
+        autor.setApp("Doe");
+        autor.setApm("Smith");
+        autor.setFecha_nacimiento(LocalDate.of(1990, 5, 15));
+        autor.setEstado(1);
+
+        when(autorRepository.findById(id)).thenReturn(Optional.of(autor));
+
+        Autor foundAutor = autorService.findById(id);
+
+        assertNotNull(foundAutor);
+        assertEquals(id, foundAutor.getId());
+        assertEquals("John", foundAutor.getNombre_autor());
+        assertEquals("Doe", foundAutor.getApp());
+        assertEquals("Smith", foundAutor.getApm());
+        assertEquals(LocalDate.of(1990, 5, 15), foundAutor.getFecha_nacimiento());
+        assertEquals(1, foundAutor.getEstado());
+    }
+
+    @Test
+    public void testFindByEstado() throws Exception {
+        Integer estado = 1;
+        List<Autor> autores = new ArrayList<>();
+        autores.add(new Autor());
+        autores.add(new Autor());
+        autores.add(new Autor());
+
+        when(autorRepository.existsByEstado(estado)).thenReturn(true);
+        when(autorRepository.findByEstado(estado)).thenReturn(autores);
+
+        List<Autor> foundAutores = autorService.findByEstado(estado);
+
+        assertNotNull(foundAutores);
+        assertEquals(autores.size(), foundAutores.size());
+    }
+
+    @Test
+    public void testSave() throws Exception {
+        Autor autor = new Autor();
+        autor.setNombre_autor("John");
+        autor.setApp("Doe");
+        autor.setApm("Smith");
+        autor.setFecha_nacimiento(LocalDate.of(1990, 5, 15));
+
+        when(autorRepository.save(autor)).thenReturn(autor);
+
+        Autor savedAutor = autorService.save(autor, 1);
+
+        assertNotNull(savedAutor);
+        assertEquals("John", savedAutor.getNombre_autor());
+        assertEquals("Doe", savedAutor.getApp());
+        assertEquals("Smith", savedAutor.getApm());
+        assertEquals(LocalDate.of(1990, 5, 15), savedAutor.getFecha_nacimiento());
+        assertEquals(1, savedAutor.getEstado());
+    }
+
+    @Test
+    public void testUpdate() throws Exception {
+        Long id = 1L;
+        Autor autor = new Autor();
+        autor.setId(id);
+        autor.setNombre_autor("John");
+        autor.setApp("Doe");
+        autor.setApm("Smith");
+        autor.setFecha_nacimiento(LocalDate.of(1990, 5, 15));
+        autor.setEstado(1);
+
+        when(autorRepository.findById(id)).thenReturn(Optional.of(autor));
+        when(autorRepository.save(autor)).thenReturn(autor);
+
+        Autor updatedAutor = autorService.update(id, autor);
+
+        assertNotNull(updatedAutor);
+        assertEquals(id, updatedAutor.getId());
+        assertEquals("John", updatedAutor.getNombre_autor());
+        assertEquals("Doe", updatedAutor.getApp());
+        assertEquals("Smith", updatedAutor.getApm());
+        assertEquals(LocalDate.of(1990, 5, 15), updatedAutor.getFecha_nacimiento());
+        assertEquals(1, updatedAutor.getEstado());
+    }
+
+    @Test
+    public void testUpdateEstado() throws Exception {
+        Long id = 1L;
+        Autor autor = new Autor();
+        autor.setId(id);
+        autor.setNombre_autor("John");
+        autor.setApp("Doe");
+        autor.setApm("Smith");
+        autor.setFecha_nacimiento(LocalDate.of(1990, 5, 15));
+        autor.setEstado(1);
+
+        when(autorRepository.findById(id)).thenReturn(Optional.of(autor));
+        when(autorRepository.save(autor)).thenReturn(autor);
+
+        Autor updatedAutor = autorService.updateEstado(id);
+
+        assertNotNull(updatedAutor);
+        assertEquals(id, updatedAutor.getId());
+        assertEquals(0, updatedAuto
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
