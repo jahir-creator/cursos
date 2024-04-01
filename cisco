@@ -1,0 +1,54 @@
+comandos de cisco
+ //Usuario restringido
+enable
+
+//Usuario Privilegiado o modo configuracion
+configure t
+o
+configure terminal
+
+//Cambiar nombre del hostname
+hostname SW1
+
+//Poner contraseña del nable mode
+enable password +contraseña
+o
+enable secret +contraseña  //esta es la mas recomendada
+
+//cifrar la contraseña se usa con enable password asi que no es recomendable
+service password-encryption
+
+//contraseña de la consola
+line console 0
+password ciscoconsole
+login
+exit
+service password-encryption
+
+**Mejor Practica**
+username userconsole privilege 15 secret claveconsole
+line console 0
+login local
+
+
+//configurar ip
+enable
+config t
+int vlan 1
+ip address 10.0.0.1 255.255.255.255
+//estado de la direccion ip
+show ip int brief
+int vlan 1
+no shutdown
+
+//Configurar contraseña VTY
+line vty 0 15
+password ciscovty
+login
+exit
+service password-encryption
+
+**Mejor Practica**
+username uservty privilege 15 secret clavevty
+line vty 0 15
+login local

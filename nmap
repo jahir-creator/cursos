@@ -1,0 +1,27 @@
+nmap scanneo 
+//ayuda
+namp -h
+
+//-sn pin scan / -v verbosidad muestra cada consulta / -T5 escaneo mas rapido menos intrusivo puede que lo detetce un firewall
+namp -v -T5 -sn 192.168.247.0/24
+
+// ver informacion de las ips como sitema opertativo puertos etc debemos estar como usuario root
+nmap -T5 -O 192.168.247.129
+
+//ver losp rimeros 1o puertos mas comunes
+nmap -T5 ..top.ports 10 192.168.247.129
+
+//ver todos los puertos
+nmap -T5 -p- 192.168.247.129
+
+//hacer el discover de todos losp uertos abiertos
+nmap -T5 -v 192.168.247.129
+
+//encontrar servicio y version de cada puerto
+nmap -T5 -p- -sV 192.168.247.129
+
+//script scan 
+nmap -T5 --script vuln 192.168.247.129
+
+//buscar scprits
+locate script | grep map

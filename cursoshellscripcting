@@ -1,0 +1,33 @@
+administrador de servidores
+Arquitctura de directorios
+*************************
+/ raiz directorio principañ
+/home almacena la carpeta de los usuarios usuairos standar no almacena el root
+/lib se alojan las bibliotecas binarios
+/mnt y /media se alamcenan los puntos de montaje usb, cd etc
+/opt alamcena paquetes de programas de terceros
+/porc informacion de todos los procesos en carpetas
+/boot directorio de arranque
+/etc almacena todo los ficheros de administracion y configuracion de los componentes del sistema es su diferencia con opt es que son solo del sistema no de terceros
+/root informacion del usuario root
+/bin directorio donde se almacenan los binario del sistema por default de linux
+/sbin almacena los binarios de los ficheros de arranque
+/tmp almcanea los archivos temporales todos los temporales
+/var directorios de bd, logs, backups ositios web en www/html
+/usr user system resources almacena solo archivos de lectura al segundo nivel de root
+*****************************
+COMANDOS BASICOS
+*****************************
+echo agregar variables de entorno imprimir teto
+hostname el usuario del equipo
+pwd donde estamos posisionados
+cd ingresar o regresar
+cat visualizar un fichero
+touch crear un nuevo fichero
+ls mostrar lo que esta dentro del directorio
+mkdir crear carpeta
+rmdir eliminar directorio
+tail muestra la ultima parte de un fichero
+
+shell scripting
+
